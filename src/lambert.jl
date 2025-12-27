@@ -1,7 +1,10 @@
+# src/lambert.jl
 using LinearAlgebra
 using StaticArrays
 
-function lambert_uv(μ::Float64, r1::Vec3, r2::Vec3, dt::Float64; longway::Bool=false)
+# Vec3 = SVector{3,Float64} is assumed defined in your project
+
+function lambert_uv(μ::Float64, r1::Vec3, r2::Vec3, dt::Float64, longway::Bool)
     r1n = sqrt(r1⋅r1)
     r2n = sqrt(r2⋅r2)
 
@@ -55,9 +58,9 @@ function lambert_uv(μ::Float64, r1::Vec3, r2::Vec3, dt::Float64; longway::Bool=
 
         sqrtC = sqrt(C)
         dy = A * ((S + z*dS)*sqrtC - (z*S - 1)*dC/(2*sqrtC)) / C
-        dχ = 0.5 * ( (dy*C - y*dC) / (C*C) ) / (sqrt(y/C))
+        dχ = 0.5 * ((dy*C - y*dC) / (C*C)) / (sqrt(y/C))
 
-        ddt = ( (3χ^2*dχ)*S + χ^3*dS + A*(0.5/sqrt(y))*dy ) / sqrt(μ)
+        ddt = ((3χ^2*dχ)*S + χ^3*dS + A*(0.5/sqrt(y))*dy) / sqrt(μ)
 
         dz = -F/ddt
         if !isfinite(dz)
@@ -65,6 +68,7 @@ function lambert_uv(μ::Float64, r1::Vec3, r2::Vec3, dt::Float64; longway::Bool=
         end
         dz = clamp(dz, -2.0, 2.0)
         z += dz
+
         if abs(dz) < 1e-10
             break
         end
@@ -77,8 +81,8 @@ function lambert_uv(μ::Float64, r1::Vec3, r2::Vec3, dt::Float64; longway::Bool=
         return (Vec3(NaN,NaN,NaN), Vec3(NaN,NaN,NaN), false)
     end
 
-    f = 1 - y/r1n
-    g = A*sqrt(y/μ)
+    f    = 1 - y/r1n
+    g    = A*sqrt(y/μ)
     gdot = 1 - y/r2n
 
     if abs(g) < 1e-14
@@ -89,3 +93,11 @@ function lambert_uv(μ::Float64, r1::Vec3, r2::Vec3, dt::Float64; longway::Bool=
     v2 = (gdot*r2 - r1)/g
     return (v1, v2, true)
 end
+
+# default short-way
+lambert_uv(μ::Float64, r1::Vec3, r2::Vec3, dt::Float64) =
+    lambert_uv(μ, r1, r2, dt, false)
+
+# keyword wrapper (THIS is what fixes your crash)
+lambert_uv(μ::Float64, r1::Vec3, r2::Vec3, dt::Float64; longway::Bool=false) =
+    lambert_uv(μ, r1, r2, dt, longway)

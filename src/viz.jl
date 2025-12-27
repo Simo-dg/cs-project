@@ -1,76 +1,122 @@
+# src/viz.jl
 using CairoMakie
 using Dates
 
-# Fill NaNs with +Inf for contour stability (they’ll just be “outside”)
-@inline function _nan_to_inf!(A::AbstractMatrix{<:Real})
-    @inbounds for i in eachindex(A)
-        if !isfinite(A[i])
-            A[i] = Inf
-        end
+@inline function _masked(Z::AbstractMatrix{<:Real}, ok::AbstractMatrix{Bool})
+    M = Matrix{Float64}(undef, size(Z)...)
+    @inbounds for i in axes(Z,1), j in axes(Z,2)
+        v = Z[i,j]
+        M[i,j] = (ok[i,j] && isfinite(v)) ? Float64(v) : NaN
     end
-    return A
+    return M
 end
 
-function plot_porkchop(res::PorkchopResult;
-        epoch0::Date=Date(2026,1,1),
-        title::String="Porkchop (Δv)",
-        c3_levels = [0,5,10,15,20,30,40,60,80,100],
-        vinf_levels = [1,2,3,4,5,6,7,8,9,10])
+@inline function _axes_days(res, t0::Float64)
+    dep_days = (res.tdep .- t0) ./ 86400.0
+    arr_days = (res.tarr .- t0) ./ 86400.0
+    return dep_days, arr_days
+end
 
-    dep_days = res.tdep ./ 86400.0
-    arr_days = res.tarr ./ 86400.0
+function _date_ticks(epoch0::Date, days::AbstractVector{<:Real}; nticks::Int=6)
+    lo = minimum(days); hi = maximum(days)
+    ticks = range(lo, hi; length=nticks)
+    labels = string.(epoch0 .+ Day.(round.(Int, ticks)))
+    return (collect(ticks), labels)
+end
 
-    # Makie expects z dims = (length(x), length(y))
-    # Our matrices are (nt, na) => need transpose for plotting with (dep_days, arr_days)
-    Zdv  = copy(res.dv')        # (na, nt)?? careful: dv is (nt, na), so dv' is (na, nt)
-    Zc3  = copy(res.c3')
-    Zvin = copy(res.vinf_arr')
+function plot_grid(res;
+        t0::Float64,
+        epoch0::Date,
+        Z::AbstractMatrix,
+        title::String,
+        zlabel::String,
+        zrange=nothing,
+        contour_levels=nothing,
+        contour_color=:black,
+        contour_style=:solid)
 
-    # After transpose, we want dims (length(dep), length(arr)) = (nt, na).
-    # dv' is (na, nt), so we must NOT transpose that way.
-    # Correct: keep original orientation and transpose at call site instead.
-    # Let's rebuild correctly:
+    dep_days, arr_days = _axes_days(res, t0)
+    ZZ = _masked(Z, res.ok)
 
-    Zdv  = copy(res.dv)         # (nt, na)
-    Zc3  = copy(res.c3)
-    Zvin = copy(res.vinf_arr)
-
-    # Mask invalid points
-    @inbounds for i in axes(Zdv,1), j in axes(Zdv,2)
-        if !res.ok[i,j] || !isfinite(Zdv[i,j])
-            Zdv[i,j]  = NaN
-            Zc3[i,j]  = NaN
-            Zvin[i,j] = NaN
-        end
-    end
-
-    fig = Figure(size=(1150, 780))
+    fig = Figure(size=(1100, 750))
     ax = Axis(fig[1,1],
         xlabel="Departure date",
         ylabel="Arrival date",
         title=title
     )
 
-    # heatmap accepts NaNs (we make them transparent)
-    hm = heatmap!(ax, dep_days, arr_days, Zdv;
-    interpolate=false,
-    nan_color=:transparent,
-    colorrange=(5.0, 20.0)
-)
-    Colorbar(fig[1,2], hm, label="Δv (km/s)")
+    hm = heatmap!(ax, dep_days, arr_days, ZZ;
+        interpolate=false,
+        nan_color=:transparent,
+        colorrange = (zrange === nothing ? automatic : zrange)
+    )
+    Colorbar(fig[1,2], hm, label=zlabel)
 
-    # contours: Contour.jl hates NaNs -> replace them with Inf before contouring
-    Zc3c  = _nan_to_inf!(copy(Zc3))
-    ZvinC = _nan_to_inf!(copy(Zvin))
+    if contour_levels !== nothing
+        contour!(ax, dep_days, arr_days, ZZ;
+            levels=contour_levels,
+            color=contour_color,
+            linewidth=1.2,
+            linestyle=contour_style
+        )
+    end
 
-    contour!(ax, dep_days, arr_days, Zc3c; levels=c3_levels, linewidth=1.0)
-    contour!(ax, dep_days, arr_days, ZvinC; levels=vinf_levels, linewidth=1.0, linestyle=:dash)
+    ax.xticks = _date_ticks(epoch0, dep_days)
+    ax.yticks = _date_ticks(epoch0, arr_days)
 
-    dep_ticks = range(minimum(dep_days), maximum(dep_days), length=6)
-    arr_ticks = range(minimum(arr_days), maximum(arr_days), length=6)
+    fig
+end
 
-    ax.xticks = (collect(dep_ticks), string.(epoch0 .+ Day.(round.(Int, dep_ticks))))
-    ax.yticks = (collect(arr_ticks), string.(epoch0 .+ Day.(round.(Int, arr_ticks))))
+function plot_c3(res;
+        t0::Float64,
+        epoch0::Date,
+        levels=[5,10,15,20,25,30,40,60],
+        zrange=nothing)
 
-    return fig
+    plot_grid(res;
+        t0=t0, epoch0=epoch0,
+        Z=res.c3,
+        title="Earth → Mars porkchop — Departure C3 (km²/s²)",
+        zlabel="C3 (km²/s²)",
+        zrange=zrange,
+        contour_levels=levels,
+        contour_color=:black,
+        contour_style=:solid
+    )
+end
+
+function plot_vinf_arr(res;
+        t0::Float64,
+        epoch0::Date,
+        levels=[2,3,4,5,6,7,8,9,10],
+        zrange=nothing)
+
+    plot_grid(res;
+        t0=t0, epoch0=epoch0,
+        Z=res.vinf_arr,
+        title="Earth → Mars porkchop — Arrival v∞ (km/s)",
+        zlabel="v∞,arr (km/s)",
+        zrange=zrange,
+        contour_levels=levels,
+        contour_color=:black,
+        contour_style=:dash
+    )
+end
+
+function plot_dv_total(res;
+        t0::Float64,
+        epoch0::Date,
+        levels=[6,7,8,9,10,11,12,13,14,15],
+        zrange=nothing)
+
+    plot_grid(res;
+        t0=t0, epoch0=epoch0,
+        Z=res.dv,
+        title="Earth → Mars porkchop — Total Δv (km/s) (patched conics)",
+        zlabel="Δv total (km/s)",
+        zrange=zrange,
+        contour_levels=levels,
+        contour_color=:black,
+        contour_style=:solid
+    )
 end

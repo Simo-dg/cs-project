@@ -11,10 +11,10 @@ using Base: ReentrantLock
 # Circular coplanar ephemeris (fast demo model)
 # -----------------------------------------------------------------------------
 @inline function state(eph::CircularCoplanarEphemeris, t::Float64)
-    θ = eph.λ0 + eph.n*t
+    θ = eph.λ0 + eph.n * t
     c = cos(θ); s = sin(θ)
-    r = Vec3(eph.a*c, eph.a*s, 0.0)
-    v = Vec3(-eph.a*eph.n*s, eph.a*eph.n*c, 0.0)
+    r = Vec3(eph.a * c, eph.a * s, 0.0)
+    v = Vec3(-eph.a * eph.n * s, eph.a * eph.n * c, 0.0)
     return r, v
 end
 
@@ -24,8 +24,8 @@ end
 function state(μcentral::Float64, eph::KeplerEphemeris, t::Float64)
     el = eph.el
     dt = t - el.t0
-    n = sqrt(μcentral/(el.a^3))
-    M = el.M0 + n*dt
+    n  = sqrt(μcentral / (el.a^3))
+    M  = el.M0 + n * dt
     el2 = KeplerianElements(el.a, el.e, el.i, el.Ω, el.ω, M, el.t0)
     return kepler_to_rv(μcentral, el2)
 end
@@ -60,8 +60,8 @@ const _SPICE_LOCK = ReentrantLock()
 const _SSB = "SOLAR SYSTEM BARYCENTER"
 
 struct SpiceEphemeris <: AbstractEphemeris
-    target::String    # e.g. "EARTH BARYCENTER", "MARS BARYCENTER"
-    observer::String  # use "SUN" for heliocentric (implemented via subtraction), or _SSB for barycentric
+    target::String
+    observer::String  # "SUN" (heliocentric via subtraction) or _SSB, etc.
     frame::String     # "J2000"
     abcorr::String    # "NONE"
 end
@@ -89,6 +89,17 @@ function utc_to_et(utc::AbstractString)
     end
 end
 
+# NEW: ET -> UTC string (lets you print best dep/arr with hour/min/sec)
+function et_to_utc(et::Float64; fmt::String="ISOC", prec::Int=0)
+    _HAS_SPICE || error("SPICE.jl not installed.")
+    lock(_SPICE_LOCK)
+    try
+        return SPICE.et2utc(et, fmt, prec)  # e.g. 2026-10-31T06:00:00
+    finally
+        unlock(_SPICE_LOCK)
+    end
+end
+
 @inline function _spkezr_locked(target::String, et::Float64, frame::String, abcorr::String, obs::String)
     st, _lt = SPICE.spkezr(target, et, frame, abcorr, obs)
     return st
@@ -99,7 +110,6 @@ function state(::TwoBodySystem, eph::SpiceEphemeris, et::Float64)
     lock(_SPICE_LOCK)
     try
         if eph.observer == "SUN"
-            # Robust heliocentric: target wrt SSB minus Sun wrt SSB
             stT = _spkezr_locked(eph.target, et, eph.frame, eph.abcorr, _SSB)
             stS = _spkezr_locked("SUN",     et, eph.frame, eph.abcorr, _SSB)
             r = Vec3(stT[1]-stS[1], stT[2]-stS[2], stT[3]-stS[3])

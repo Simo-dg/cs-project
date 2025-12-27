@@ -20,4 +20,5 @@ export lambert_uv, propagate_universal
 export plot_porkchop
 export flyby_turning_angle, powered_flyby_delta_v
 export porkchop_grid_dep_arr
+export plot_c3, plot_vinf_arr, plot_dv_total
 end # module

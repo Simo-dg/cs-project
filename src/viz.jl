@@ -33,7 +33,8 @@ function plot_grid(res;
         zrange=nothing,
         contour_levels=nothing,
         contour_color=:black,
-        contour_style=:solid)
+        contour_style=:solid,
+        colormap=:viridis)  # <--- NUOVO ARGOMENTO AGGIUNTO QUI
 
     dep_days, arr_days = _axes_days(res, t0)
     ZZ = _masked(Z, res.ok)
@@ -48,7 +49,8 @@ function plot_grid(res;
     hm = heatmap!(ax, dep_days, arr_days, ZZ;
         interpolate=false,
         nan_color=:transparent,
-        colorrange = (zrange === nothing ? automatic : zrange)
+        colorrange = (zrange === nothing ? automatic : zrange),
+        colormap = colormap  # <--- PASSAGGIO ALLA HEATMAP
     )
     Colorbar(fig[1,2], hm, label=zlabel)
 
@@ -67,56 +69,13 @@ function plot_grid(res;
     fig
 end
 
-function plot_c3(res;
-        t0::Float64,
-        epoch0::Date,
-        levels=[5,10,15,20,25,30,40,60],
-        zrange=nothing)
-
-    plot_grid(res;
-        t0=t0, epoch0=epoch0,
-        Z=res.c3,
-        title="Earth → Mars porkchop — Departure C3 (km²/s²)",
-        zlabel="C3 (km²/s²)",
-        zrange=zrange,
-        contour_levels=levels,
-        contour_color=:black,
-        contour_style=:solid
-    )
+# Wrapper per compatibilità (non strettamente necessari se si usa plot_grid direttamente)
+function plot_c3(res; t0, epoch0, levels=[10,20,30], zrange=nothing)
+    plot_grid(res; t0=t0, epoch0=epoch0, Z=res.c3, title="Departure C3", zlabel="C3", zrange=zrange, contour_levels=levels)
 end
-
-function plot_vinf_arr(res;
-        t0::Float64,
-        epoch0::Date,
-        levels=[2,3,4,5,6,7,8,9,10],
-        zrange=nothing)
-
-    plot_grid(res;
-        t0=t0, epoch0=epoch0,
-        Z=res.vinf_arr,
-        title="Earth → Mars porkchop — Arrival v∞ (km/s)",
-        zlabel="v∞,arr (km/s)",
-        zrange=zrange,
-        contour_levels=levels,
-        contour_color=:black,
-        contour_style=:dash
-    )
+function plot_vinf_arr(res; t0, epoch0, levels=[2,4,6], zrange=nothing)
+    plot_grid(res; t0=t0, epoch0=epoch0, Z=res.vinf_arr, title="Arr v-inf", zlabel="km/s", zrange=zrange, contour_levels=levels)
 end
-
-function plot_dv_total(res;
-        t0::Float64,
-        epoch0::Date,
-        levels=[6,7,8,9,10,11,12,13,14,15],
-        zrange=nothing)
-
-    plot_grid(res;
-        t0=t0, epoch0=epoch0,
-        Z=res.dv,
-        title="Earth → Mars porkchop — Total Δv (km/s) (patched conics)",
-        zlabel="Δv total (km/s)",
-        zrange=zrange,
-        contour_levels=levels,
-        contour_color=:black,
-        contour_style=:solid
-    )
+function plot_dv_total(res; t0, epoch0, levels=[6,8,10], zrange=nothing)
+    plot_grid(res; t0=t0, epoch0=epoch0, Z=res.dv, title="Total dV", zlabel="km/s", zrange=zrange, contour_levels=levels)
 end

@@ -143,7 +143,7 @@ else
         colormap=Reverse(:plasma)
     )
 
-    pork_path = abspath(joinpath(@__DIR__, "..", "voyager_porkchop.png"))
+    pork_path = abspath(joinpath(@__DIR__, "..", "plots", "voyager_porkchop.png"))
     save(pork_path, fig_pork)
     println("Porkchop plot saved to: $pork_path")
 
@@ -158,8 +158,8 @@ else
         (t_dep_opt, t_fly_opt, t_arr_opt);
         title_str = "Voyager 2: Earth -> Jupiter -> Saturn"
     )
-    
-    traj_path = abspath(joinpath(@__DIR__, "..", "voyager_trajectory_3d.png"))
+
+    traj_path = abspath(joinpath(@__DIR__, "..", "plots", "voyager_trajectory_3d.png"))
     save(traj_path, fig_traj)
     println("3D Trajectory saved to: $traj_path")
 end

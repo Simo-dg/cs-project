@@ -5,7 +5,7 @@ using Dates
 using Downloads
 using BenchmarkTools
 using Profile
-using CairoMakie
+using JLD2
 
 PS = PorkchopSolver
 
@@ -227,3 +227,15 @@ println("best_dep_utc   = $best_dep_utc")
 println("best_arr_utc   = $best_arr_utc")
 println("best_tof_days  = $best_tof_days  (hours = $best_tof_hours)")
 println("best_dv        = $best_dv")
+
+println("\n=== SAVING RESULTS ===")
+output_file = joinpath(@__DIR__, "..", "mission_data.jld2")
+
+# Save the complex structs and variables to disk
+jldsave(output_file; 
+    res,             # The massive result matrix
+    tdep0,           # Needed for axis scaling
+    best_dv,
+    best_dep_utc,
+    best_arr_utc
+)

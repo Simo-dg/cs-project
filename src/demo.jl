@@ -7,7 +7,7 @@ using BenchmarkTools
 using Profile
 using JLD2
 
-PS = PorkchopSolver
+const PS = PorkchopSolver
 
 function merge_min(a::PS.PorkchopResult, b::PS.PorkchopResult)
     dv  = similar(a.dv)

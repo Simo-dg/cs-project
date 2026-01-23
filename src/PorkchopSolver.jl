@@ -26,4 +26,4 @@ export plot_c3, plot_vinf_arr, plot_dv_total
 export porkchop_flyby, FlybyResult
 export plot_trajectory_3d
 
-end # module
+end 

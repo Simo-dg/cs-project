@@ -1,4 +1,3 @@
-# src/viz.jl
 using CairoMakie
 using Dates
 
@@ -34,7 +33,7 @@ function plot_grid(res;
         contour_levels=nothing,
         contour_color=:black,
         contour_style=:solid,
-        colormap=:viridis)  # <--- NUOVO ARGOMENTO AGGIUNTO QUI
+        colormap=:viridis)  
 
     dep_days, arr_days = _axes_days(res, t0)
     ZZ = _masked(Z, res.ok)
@@ -50,7 +49,7 @@ function plot_grid(res;
         interpolate=false,
         nan_color=:transparent,
         colorrange = (zrange === nothing ? automatic : zrange),
-        colormap = colormap  # <--- PASSAGGIO ALLA HEATMAP
+        colormap = colormap  
     )
     Colorbar(fig[1,2], hm, label=zlabel)
 
@@ -69,7 +68,6 @@ function plot_grid(res;
     fig
 end
 
-# Wrapper per compatibilità (non strettamente necessari se si usa plot_grid direttamente)
 function plot_c3(res; t0, epoch0, levels=[10,20,30], zrange=nothing)
     plot_grid(res; t0=t0, epoch0=epoch0, Z=res.c3, title="Departure C3", zlabel="C3", zrange=zrange, contour_levels=levels)
 end

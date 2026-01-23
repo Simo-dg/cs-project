@@ -37,7 +37,6 @@ PS.spice_load_kernels!([
 # ------------------------------------------------------------------
 # 2. SYSTEM DEFINITION (CONST for Performance!)
 # ------------------------------------------------------------------
-# Using 'const' here prevents the "Global Scope" memory leak
 const sun = PS.Body("Sun", 1.32712440018e11, 695700.0)
 const sys = PS.TwoBodySystem(sun)
 

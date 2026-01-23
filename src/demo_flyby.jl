@@ -6,7 +6,6 @@ using BenchmarkTools
 using Profile
 using JLD2
 
-# Constants
 const PS = PorkchopSolver
 
 # ------------------------------------------------------------------
@@ -60,7 +59,7 @@ t1_f = PS.utc_to_et("2024-01-01T00:00:00")
 t0_a = PS.utc_to_et("2026-01-01T00:00:00")
 t1_a = PS.utc_to_et("2030-01-01T00:00:00")
 
-dt = 5.0 * 86400.0 # 5 Days resolution
+dt = 5.0 * 86400.0 
 
 println("\n=== SIMULATION SETTINGS (Flyby 2020) ===")
 println("Scan Resolution: 5.0 days")
@@ -68,7 +67,7 @@ println("Scan Resolution: 5.0 days")
 # ------------------------------------------------------------------
 # 3. BENCHMARKING WRAPPER
 # ------------------------------------------------------------------
-# We wrap the solver in a closure to benchmark it cleanly
+
 solver_task = () -> PS.porkchop_flyby(sys, bm_dep, bm_fly, bm_arr,
     (t0_d, t1_d, dt),
     (t0_f, t1_f, dt),
@@ -85,7 +84,7 @@ solver_task = () -> PS.porkchop_flyby(sys, bm_dep, bm_fly, bm_arr,
 # 4. EXECUTION & PROFILING
 # ------------------------------------------------------------------
 println("\n=== WARMUP ===")
-solver_task() # Run once to compile
+solver_task() 
 
 println("\n=== @time RUN ===")
 @time res = solver_task()
@@ -106,4 +105,3 @@ outfile = joinpath(@__DIR__, "..", "flyby_data.jld2")
 println("\n=== SAVING DATA ===")
 jldsave(outfile; res, t0_d, sys, bm_dep, bm_fly, bm_arr)
 println("Saved to: $outfile")
-println("Run 'include(\"make_plots_flyby.jl\")' to visualize.")

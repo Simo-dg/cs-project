@@ -1,4 +1,3 @@
-# src/ephemeris.jl
 # Ephemeris backends: circular, Kepler, (optional) NAIF SPICE
 # - For SPICE, we keep calls thread-safe by using a lock here.
 # - For performance, porkchop precomputes states serially anyway.
@@ -8,7 +7,7 @@ using LinearAlgebra
 using Base: ReentrantLock
 
 # -----------------------------------------------------------------------------
-# Circular coplanar ephemeris (fast demo model)
+# Circular coplanar ephemeris 
 # -----------------------------------------------------------------------------
 @inline function state(eph::CircularCoplanarEphemeris, t::Float64)
     θ = eph.λ0 + eph.n * t
@@ -19,7 +18,7 @@ using Base: ReentrantLock
 end
 
 # -----------------------------------------------------------------------------
-# Kepler ephemeris (two-body around system.central)
+# Kepler ephemeris 
 # -----------------------------------------------------------------------------
 function state(μcentral::Float64, eph::KeplerEphemeris, t::Float64)
     el = eph.el
@@ -44,7 +43,7 @@ end
 end
 
 # -----------------------------------------------------------------------------
-# Optional SPICE backend (NAIF kernels, e.g. de440.bsp)
+# SPICE backend (NAIF kernels, e.g. de440.bsp)
 # -----------------------------------------------------------------------------
 const _HAS_SPICE = let ok = false
     try
@@ -61,9 +60,9 @@ const _SSB = "SOLAR SYSTEM BARYCENTER"
 
 struct SpiceEphemeris <: AbstractEphemeris
     target::String
-    observer::String  # "SUN" (heliocentric via subtraction) or _SSB, etc.
-    frame::String     # "J2000"
-    abcorr::String    # "NONE"
+    observer::String  
+    frame::String     
+    abcorr::String    
 end
 
 function spice_load_kernels!(paths::AbstractVector{<:AbstractString})
@@ -89,12 +88,12 @@ function utc_to_et(utc::AbstractString)
     end
 end
 
-# NEW: ET -> UTC string (lets you print best dep/arr with hour/min/sec)
+
 function et_to_utc(et::Float64; fmt::String="ISOC", prec::Int=0)
     _HAS_SPICE || error("SPICE.jl not installed.")
     lock(_SPICE_LOCK)
     try
-        return SPICE.et2utc(et, fmt, prec)  # e.g. 2026-10-31T06:00:00
+        return SPICE.et2utc(et, fmt, prec) 
     finally
         unlock(_SPICE_LOCK)
     end

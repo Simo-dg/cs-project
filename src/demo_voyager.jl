@@ -38,7 +38,7 @@ t1_f = PS.utc_to_et("1979-08-01T00:00:00")
 t0_a = PS.utc_to_et("1981-08-01T00:00:00")
 t1_a = PS.utc_to_et("1981-09-15T00:00:00")
 
-dt = 1.0 * 86400.0 # High res (1 day)
+dt = 1.0 * 86400.0 # Resolution 1 day
 
 println("\n=== VOYAGER 2 SIMULATION ===")
 

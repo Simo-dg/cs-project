@@ -1,8 +1,6 @@
-# src/lambert.jl
 using LinearAlgebra
 using StaticArrays
 
-# Vec3 = SVector{3,Float64} is assumed defined in your project
 
 function lambert_uv(μ::Float64, r1::Vec3, r2::Vec3, dt::Float64, longway::Bool)
     r1n = sqrt(r1⋅r1)
@@ -98,6 +96,6 @@ end
 lambert_uv(μ::Float64, r1::Vec3, r2::Vec3, dt::Float64) =
     lambert_uv(μ, r1, r2, dt, false)
 
-# keyword wrapper (THIS is what fixes your crash)
+
 lambert_uv(μ::Float64, r1::Vec3, r2::Vec3, dt::Float64; longway::Bool=false) =
     lambert_uv(μ, r1, r2, dt, longway)

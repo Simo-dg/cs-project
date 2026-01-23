@@ -1,4 +1,3 @@
-# src/demo.jl
 include("PorkchopSolver.jl")
 using .PorkchopSolver
 using Dates
@@ -31,12 +30,12 @@ end
 
 
 # -------------------------------------------------
-# 0) Precision knob: grid resolution (this is your “millions” control)
+# 0) Precision knob: grid resolution 
 # -------------------------------------------------
-dt_hours = 3.0            # 6h ~ millions, 3h ~ tens of millions, 1h huge
+dt_hours = 3.0            
 dt = dt_hours * 3600.0
 
-# Detect allocation tracking (so we don’t run @btime and trash .mem)
+# Detect allocation tracking 
 opts = Base.JLOptions()
 tracking_alloc = (getfield(opts, :tracked_path) != C_NULL) || (getfield(opts, :malloc_log) != 0)
 
@@ -215,7 +214,7 @@ end
 best_dep_et = res.tdep[best_i]
 best_arr_et = res.tarr[best_j]
 
-# ✅ PRINT WITH HOURS (UTC timestamps from SPICE)
+
 best_dep_utc = PS.et_to_utc(best_dep_et; prec=0)
 best_arr_utc = PS.et_to_utc(best_arr_et; prec=0)
 
@@ -233,8 +232,8 @@ output_file = joinpath(@__DIR__, "..", "mission_data.jld2")
 
 # Save the complex structs and variables to disk
 jldsave(output_file; 
-    res,             # The massive result matrix
-    tdep0,           # Needed for axis scaling
+    res,             
+    tdep0,          
     best_dv,
     best_dep_utc,
     best_arr_utc

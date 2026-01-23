@@ -1,15 +1,13 @@
-# src/make_all_plots.jl
 using CairoMakie
 using JLD2
 using Dates
 using Printf
-
-# Load the Solver Module (needed for Struct definitions)
 include("PorkchopSolver.jl")
 using .PorkchopSolver
+
 const PS = PorkchopSolver
 
-# Define where data lives
+
 data_dir = joinpath(@__DIR__, "..")
 plot_dir = joinpath(@__DIR__, "..", "plots")
 mkpath(plot_dir)
@@ -17,7 +15,7 @@ mkpath(plot_dir)
 println("=== AUTOMATED PLOT GENERATION ===\n")
 
 # -------------------------------------------------------
-# 1. MARS MISSION (from demo.jl -> mission_data.jld2)
+# 1. MARS MISSION 
 # -------------------------------------------------------
 path_mars = joinpath(data_dir, "mission_data.jld2")
 if isfile(path_mars)
@@ -42,7 +40,7 @@ else
 end
 
 # -------------------------------------------------------
-# 2. FLYBY 2020 (from demo_flyby.jl -> flyby_data.jld2)
+# 2. FLYBY 2020 
 # -------------------------------------------------------
 path_fly = joinpath(data_dir, "flyby_data.jld2")
 if isfile(path_fly)
@@ -67,7 +65,7 @@ else
 end
 
 # -------------------------------------------------------
-# 3. VOYAGER 2 (from demo_voyager2.jl -> voyager2_data.jld2)
+# 3. VOYAGER 2 
 # -------------------------------------------------------
 path_voy = joinpath(data_dir, "voyager2_data.jld2")
 if isfile(path_voy)

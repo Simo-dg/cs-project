@@ -3,8 +3,8 @@ using StaticArrays
 using LinearAlgebra
 
 struct PorkchopResult
-    tdep::Vector{Float64}          # seconds
-    tarr::Vector{Float64}          # seconds
+    tdep::Vector{Float64}         
+    tarr::Vector{Float64}         
     dv::Matrix{Float64}            # total Δv (km/s) OR proxy (km/s)
     c3::Matrix{Float64}            # departure C3 (km^2/s^2)
     vinf_arr::Matrix{Float64}      # arrival v∞ (km/s)
@@ -113,7 +113,7 @@ function porkchop_grid_dep_arr!(ws::PorkchopWorkspace,
     va = ws.vinf_arr
     ok = ws.ok
 
-    # KEY FIX 1: :static scheduling reduces per-call scheduling overhead
+    
     Threads.@threads :static for i in 1:nt
         td  = ws.tdep[i]
         r1  = ws.r1s[i]
@@ -134,7 +134,7 @@ function porkchop_grid_dep_arr!(ws::PorkchopWorkspace,
             r2  = ws.r2s[j]
             v2p = ws.v2ps[j]
 
-            # KEY FIX 2: positional call in the hot loop (no keyword dispatch)
+            
             v1t, v2t, success = lambert_uv(μc, r1, r2, tof, longway)
             ok[i,j] = success
 

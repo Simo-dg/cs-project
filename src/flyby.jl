@@ -83,7 +83,7 @@ function porkchop_flyby(sys::TwoBodySystem,
     μ_dep = body_dep.body.μ
     μ_arr = body_arr.body.μ
     
-    # Core Loop: Threaded over departure dates
+    
     @threads :static for i in 1:nd
         r_d = ws.r_dep[i]
         v_d = ws.v_dep[i]

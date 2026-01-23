@@ -16,21 +16,19 @@ end
     vout    = sqrt(vout_sq)
 
     # Required turning angle
-    # Clamp to handle numerical noise
     cos_phi = clamp((vinf_in ⋅ vinf_out) / (vin * vout), -1.0, 1.0)
     phi_req = acos(cos_phi)
 
-    # Max passive turning angle (sum of incoming and outgoing bending)
+    # Max passive turning angle 
     term_in  = 1.0 + (rp_min * vin_sq) / μp
     term_out = 1.0 + (rp_min * vout_sq) / μp
     delta_max = asin(1.0/term_in) + asin(1.0/term_out)
 
     if phi_req <= delta_max
-        # Gravity is sufficient; cost is only the pump maneuver (magnitude change)
+        # Gravity is sufficient
         return abs(vout - vin)
     else
-        # Gravity insufficient; powered burn at periapsis required
-        # We model the burn at periapsis to cover the excess angle (phi_req - delta_max)
+        # Gravity insufficientx)
         vp_in  = sqrt(vin_sq + 2*μp/rp_min)
         vp_out = sqrt(vout_sq + 2*μp/rp_min)
         

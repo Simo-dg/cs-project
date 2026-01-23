@@ -95,8 +95,8 @@ mem = @allocated solver_task()
 println("Memory allocated: ", round(mem/1e6, digits=2), " MB")
 
 # Optional: Full Benchmark (takes longer)
-# println("\n=== BenchmarkTools ===")
-# @btime ($solver_task)()
+#println("\n=== BenchmarkTools ===")
+#@btime ($solver_task)()
 
 # ------------------------------------------------------------------
 # 5. SAVE RESULTS

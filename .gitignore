@@ -1,2 +1,3 @@
 kernels/
 *.jld2
+.DS_Store

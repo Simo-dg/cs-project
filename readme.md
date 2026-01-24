@@ -70,8 +70,8 @@ The implementation explicitly targets performance:
 
 **Measured performance (Julia, multi-threaded):**
 
-- Short-way Lambert scan: **7.09 s**
-- Long-way Lambert scan: **12.19 s**
+- Short-way Lambert scan: **6.03 s**
+- Long-way Lambert scan: **9.47 s**
 - Total allocations: **≈ 56k**
 - Peak allocated memory: **≈ 3.0 MB**
 
@@ -91,7 +91,7 @@ Representative porkchop, Δv, C3, and $v_\infty$ plots are automatically generat
 ### Flyby Mission (Earth–Jupiter–Saturn, 2020 Window)
 
 - Scan resolution: **5 days**
-- Runtime: **3.22 s**
+- Runtime: **2.59 s**
 - Allocations: **≈ 2.8k**
 - Allocated memory: **≈ 2.7 MB**
 
@@ -109,7 +109,7 @@ This scenario reproduces a simplified version of the historical Voyager-2 missio
 
 **Measured performance:**
 
-- Runtime: **0.05 s**
+- Runtime: **0.04 s**
 - Allocations: **726**
 - Memory usage: **160 kB**
 

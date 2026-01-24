@@ -11,10 +11,10 @@ const PS = PorkchopSolver
 # ------------------------------------------------------------------
 # 1. ENVIRONMENT & KERNELS
 # ------------------------------------------------------------------
-kern_dir = joinpath(@__DIR__, "..", "kernels")
+const kern_dir = joinpath(@__DIR__, "..", "kernels")
 mkpath(kern_dir)
 
-kernels = Dict(
+const kernels = Dict(
     "naif0012.tls" => "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls",
     "pck00010.tpc" => "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc",
     "de440.bsp"    => "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440.bsp",
@@ -37,29 +37,29 @@ PS.spice_load_kernels!([
 # ------------------------------------------------------------------
 # 2. SETUP SIMULATION
 # ------------------------------------------------------------------
-sun = PS.Body("Sun", 1.32712440018e11, 695700.0)
-sys = PS.TwoBodySystem(sun)
+const sun = PS.Body("Sun", 1.32712440018e11, 695700.0)
+const sys = PS.TwoBodySystem(sun)
 
-earth   = PS.Body("Earth", 3.986004354e5, 6378.1363)
-jupiter = PS.Body("Jupiter", 1.26686534e8, 71492.0)
-saturn  = PS.Body("Saturn", 3.7931187e7, 60268.0)
+const earth   = PS.Body("Earth", 3.986004354e5, 6378.1363)
+const jupiter = PS.Body("Jupiter", 1.26686534e8, 71492.0)
+const saturn  = PS.Body("Saturn", 3.7931187e7, 60268.0)
 
-# SPICE Ephemerides
-bm_dep = PS.BodyModel(earth,   PS.SpiceEphemeris("EARTH BARYCENTER", "SUN", "J2000", "NONE"))
-bm_fly = PS.BodyModel(jupiter, PS.SpiceEphemeris("JUPITER BARYCENTER", "SUN", "J2000", "NONE"))
-bm_arr = PS.BodyModel(saturn,  PS.SpiceEphemeris("SATURN BARYCENTER", "SUN", "J2000", "NONE"))
+# SPICE Ephemerides 
+const bm_dep = PS.BodyModel(earth,   PS.SpiceEphemeris("EARTH BARYCENTER", "SUN", "J2000", "NONE"))
+const bm_fly = PS.BodyModel(jupiter, PS.SpiceEphemeris("JUPITER BARYCENTER", "SUN", "J2000", "NONE"))
+const bm_arr = PS.BodyModel(saturn,  PS.SpiceEphemeris("SATURN BARYCENTER", "SUN", "J2000", "NONE"))
 
-# 2020 Window (Great Conjunction alignment)
-t0_d = PS.utc_to_et("2019-06-01T00:00:00")
-t1_d = PS.utc_to_et("2021-06-01T00:00:00")
+# 2020 Window (Great Conjunction alignment) 
+const t0_d = PS.utc_to_et("2019-06-01T00:00:00")
+const t1_d = PS.utc_to_et("2021-06-01T00:00:00")
 
-t0_f = PS.utc_to_et("2021-01-01T00:00:00")
-t1_f = PS.utc_to_et("2024-01-01T00:00:00")
+const t0_f = PS.utc_to_et("2021-01-01T00:00:00")
+const t1_f = PS.utc_to_et("2024-01-01T00:00:00")
 
-t0_a = PS.utc_to_et("2026-01-01T00:00:00")
-t1_a = PS.utc_to_et("2030-01-01T00:00:00")
+const t0_a = PS.utc_to_et("2026-01-01T00:00:00")
+const t1_a = PS.utc_to_et("2030-01-01T00:00:00")
 
-dt = 5.0 * 86400.0 
+const dt = 5.0 * 86400.0 
 
 println("\n=== SIMULATION SETTINGS (Flyby 2020) ===")
 println("Scan Resolution: 5.0 days")
@@ -92,11 +92,7 @@ println("\n=== @time RUN ===")
 println("\n=== @allocated (Zero-Alloc Check) ===")
 GC.gc()
 mem = @allocated solver_task()
-println("Memory allocated: ", round(mem/1e6, digits=2), " MB")
-
-# Optional: Full Benchmark (takes longer)
-#println("\n=== BenchmarkTools ===")
-#@btime ($solver_task)()
+println("Memory allocated: ", round(mem/1e6, digits=2), " MB (Target: ~0 MB)")
 
 # ------------------------------------------------------------------
 # 5. SAVE RESULTS

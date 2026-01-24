@@ -6,6 +6,9 @@ using BenchmarkTools
 using Profile
 using JLD2
 
+# Toggle this to false to skip the Profile steps
+const ENABLE_PROFILING = false
+
 const PS = PorkchopSolver
 
 function merge_min(a::PS.PorkchopResult, b::PS.PorkchopResult)
@@ -28,12 +31,11 @@ function merge_min(a::PS.PorkchopResult, b::PS.PorkchopResult)
     return PS.PorkchopResult(a.tdep, a.tarr, dv, c3, va, ok)
 end
 
-
 # -------------------------------------------------
 # 0) Precision knob: grid resolution 
 # -------------------------------------------------
-dt_hours = 3.0            
-dt = dt_hours * 3600.0
+const dt_hours = 3.0            
+const dt = dt_hours * 3600.0
 
 # Detect allocation tracking 
 opts = Base.JLOptions()
@@ -42,10 +44,10 @@ tracking_alloc = (getfield(opts, :tracked_path) != C_NULL) || (getfield(opts, :m
 # -------------------------------------------------
 # 1) Ensure NAIF kernels exist (auto-download)
 # -------------------------------------------------
-kern_dir = joinpath(@__DIR__, "..", "kernels")
+const kern_dir = joinpath(@__DIR__, "..", "kernels")
 mkpath(kern_dir)
 
-kernels = Dict(
+const kernels = Dict(
     "naif0012.tls" => "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls",
     "pck00010.tpc" => "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc",
     "de440.bsp"    => "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440.bsp",
@@ -57,8 +59,6 @@ for (fname, url) in kernels
     if !isfile(fpath)
         println("  downloading $fname")
         Downloads.download(url, fpath)
-    else
-        println("  found $fname")
     end
 end
 
@@ -71,88 +71,74 @@ PS.spice_load_kernels!([
 # -------------------------------------------------
 # 2) Two-body system (Sun)
 # -------------------------------------------------
-μ_sun = 1.32712440018e11
-sun = PS.Body("Sun", μ_sun, 695700.0)
-sys = PS.TwoBodySystem(sun)
+const μ_sun = 1.32712440018e11
+const sun = PS.Body("Sun", μ_sun, 695700.0)
+const sys = PS.TwoBodySystem(sun)
 
-earth = PS.Body("Earth", 3.986004354e5, 6378.1363)
-mars  = PS.Body("Mars",  4.282837e4,   3396.19)
+const earth = PS.Body("Earth", 3.986004354e5, 6378.1363)
+const mars  = PS.Body("Mars",  4.282837e4,   3396.19)
 
-ephE = PS.SpiceEphemeris("EARTH BARYCENTER", "SUN", "J2000", "NONE")
-ephM = PS.SpiceEphemeris("MARS BARYCENTER",  "SUN", "J2000", "NONE")
-dep = PS.BodyModel(earth, ephE)
-arr = PS.BodyModel(mars,  ephM)
+const ephE = PS.SpiceEphemeris("EARTH BARYCENTER", "SUN", "J2000", "NONE")
+const ephM = PS.SpiceEphemeris("MARS BARYCENTER",  "SUN", "J2000", "NONE")
+const dep = PS.BodyModel(earth, ephE)
+const arr = PS.BodyModel(mars,  ephM)
 
 # -------------------------------------------------
 # 3) Date ranges
 # -------------------------------------------------
-dep_start_utc = "2026-01-01T00:00:00"
-dep_end_utc   = "2028-01-01T00:00:00"
-arr_start_utc = "2026-03-01T00:00:00"
-arr_end_utc   = "2029-01-01T00:00:00"
+const dep_start_utc = "2026-01-01T00:00:00"
+const dep_end_utc   = "2028-01-01T00:00:00"
+const arr_start_utc = "2026-03-01T00:00:00"
+const arr_end_utc   = "2029-01-01T00:00:00"
 
-tdep0 = PS.utc_to_et(dep_start_utc)
-tdep1 = PS.utc_to_et(dep_end_utc)
-tarr0 = PS.utc_to_et(arr_start_utc)
-tarr1 = PS.utc_to_et(arr_end_utc)
+const tdep0 = PS.utc_to_et(dep_start_utc)
+const tdep1 = PS.utc_to_et(dep_end_utc)
+const tarr0 = PS.utc_to_et(arr_start_utc)
+const tarr1 = PS.utc_to_et(arr_end_utc)
 
-tdep_range = (tdep0, tdep1, dt)
-tarr_range = (tarr0, tarr1, dt)
+const tdep_range = (tdep0, tdep1, dt)
+const tarr_range = (tarr0, tarr1, dt)
 
 # -------------------------------------------------
 # 4) Mission assumptions
 # -------------------------------------------------
-rpark_earth = 6678.0
-rpark_mars  = 4500.0
+const rpark_earth = 6678.0
+const rpark_mars  = 4500.0
 
-tof_min =  60 * 86400.0
-tof_max = 500 * 86400.0
-dv_cap  = 30.0
+const tof_min =  60 * 86400.0
+const tof_max = 500 * 86400.0
+const dv_cap  = 30.0
 
 # -------------------------------------------------
 # 5) Print grid size + expected work
 # -------------------------------------------------
-nt = Int(floor((tdep1 - tdep0)/dt)) + 1
-na = Int(floor((tarr1 - tarr0)/dt)) + 1
+const nt = Int(floor((tdep1 - tdep0)/dt)) + 1
+const na = Int(floor((tarr1 - tarr0)/dt)) + 1
 
+# Optional stats (doesn't affect performance)
 combos_raw = nt * na
 band_width = Int(clamp(floor((tof_max - tof_min)/dt), 0, na))
 combos_lambert_est = nt * band_width
 
 println("\n=== GRID SETTINGS ===")
 println("dt = $(dt_hours) hours")
-println("nt (dep points) = $nt")
-println("na (arr points) = $na")
-println("raw combos nt*na = $combos_raw  (", round(combos_raw/1e6, digits=2), " million)")
-println("estimated Lambert solves per pass ≈ $combos_lambert_est  (",
-        round(combos_lambert_est/1e6, digits=2), " million)")
-println("estimated Lambert solves short+long ≈ $(2*combos_lambert_est)  (",
-        round(2*combos_lambert_est/1e6, digits=2), " million)")
+println("Grid: $nt x $na")
+println("Est. Solves: $(round(2*combos_lambert_est/1e6, digits=2)) million")
 
 # -------------------------------------------------
-# 6) Workspaces
+# 6) Workspaces (MUST BE CONST)
 # -------------------------------------------------
-wsS = PS.PorkchopWorkspace(nt, na)
-wsL = PS.PorkchopWorkspace(nt, na)
+const wsS = PS.PorkchopWorkspace(nt, na)
+const wsL = PS.PorkchopWorkspace(nt, na)
 
 shortway = () -> PS.porkchop_grid_dep_arr!(wsS, sys, dep, arr, tdep_range, tarr_range;
-    metric=:dv,
-    dep_rpark=rpark_earth,
-    arr_rpark=rpark_mars,
-    tof_min=tof_min,
-    tof_max=tof_max,
-    dv_cap=dv_cap,
-    longway=false
+    metric=:dv, dep_rpark=rpark_earth, arr_rpark=rpark_mars,
+    tof_min=tof_min, tof_max=tof_max, dv_cap=dv_cap, longway=false
 )
 
 longway = () -> PS.porkchop_grid_dep_arr!(wsL, sys, dep, arr, tdep_range, tarr_range;
-    metric=:dv,
-    dep_rpark=rpark_earth,
-    arr_rpark=rpark_mars,
-    tof_min=tof_min,
-    tof_max=tof_max,
-    dv_cap=dv_cap,
-    longway=true
+    metric=:dv, dep_rpark=rpark_earth, arr_rpark=rpark_mars,
+    tof_min=tof_min, tof_max=tof_max, dv_cap=dv_cap, longway=true
 )
 
 # -------------------------------------------------
@@ -170,50 +156,40 @@ println("\n=== @time short-way ===")
 println("\n=== @time long-way ===")
 @time resL = longway()
 
-println("\n=== @allocated (after GC) ===")
-GC.gc(); aS = @allocated shortway()
-GC.gc(); aL = @allocated longway()
-println("Allocated short-way: ", round(aS/1e6, digits=2), " MB")
-println("Allocated long-way:  ", round(aL/1e6, digits=2), " MB")
 
-if !tracking_alloc
+if ENABLE_PROFILING && !tracking_alloc
     println("\n=== BenchmarkTools (@btime) short-way ===")
     @btime ($shortway)()
-
-    println("\n=== CPU Profile (short-way) ===")
-    Profile.clear()
-    Profile.@profile shortway()
-    Profile.print(format=:flat, sortedby=:count)
 else
-    println("\n=== NOTE ===")
-    println("Running with --track-allocation=user: skipping @btime/profile to keep .mem meaningful.")
+    println("\n=== Skipped Profiling (ENABLE_PROFILING = false) ===")
 end
 
 # -------------------------------------------------
 # 9) Merge + best
 # -------------------------------------------------
-res = merge_min(resS, resL)
-finite = filter(isfinite, vec(res.dv))
-dvmin = minimum(finite)
-dvmax = maximum(finite)
-@show dvmin dvmax
 
-best_dv = Inf
-best_i = 0
-best_j = 0
-@inbounds for i in axes(res.dv, 1), j in axes(res.dv, 2)
-    global best_dv, best_i, best_j
-    v = res.dv[i,j]
-    if isfinite(v) && v < best_dv
-        best_dv = v
-        best_i = i
-        best_j = j
+function find_best_mission(dv_matrix)
+    best_val = Inf
+    best_idx = (1, 1)
+
+    @inbounds for i in CartesianIndices(dv_matrix)
+        val = dv_matrix[i]
+        if val < best_val
+            best_val = val
+            best_idx = Tuple(i)
+        end
     end
+    return best_val, best_idx
 end
 
+res = merge_min(resS, resL)
+
+# Fast search using the function
+best_dv, (best_i, best_j) = find_best_mission(res.dv)
+
+# Extract times
 best_dep_et = res.tdep[best_i]
 best_arr_et = res.tarr[best_j]
-
 
 best_dep_utc = PS.et_to_utc(best_dep_et; prec=0)
 best_arr_utc = PS.et_to_utc(best_arr_et; prec=0)
@@ -230,7 +206,6 @@ println("best_dv        = $best_dv")
 println("\n=== SAVING RESULTS ===")
 output_file = joinpath(@__DIR__, "..", "mission_data.jld2")
 
-# Save the complex structs and variables to disk
 jldsave(output_file; 
     res,             
     tdep0,          

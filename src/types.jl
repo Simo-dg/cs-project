@@ -1,3 +1,19 @@
+"""
+    types.jl
+
+    This module defines fundamental types and data structures for astrodynamics and interplanetary mission analysis.
+    It includes representations for celestial bodies, two-body systems, orbital elements, ephemeris models, and body models.
+
+    Main features:
+    - Vec3: 3D vector type for positions and velocities
+    - Body: physical properties of a celestial body
+    - TwoBodySystem: central body system for orbit propagation
+    - KeplerianElements: classical orbital elements
+    - AbstractEphemeris and concrete ephemeris types (circular, Keplerian)
+    - BodyModel: combines a body with its ephemeris
+"""
+
+
 using StaticArrays
 
 const Vec3 = SVector{3,Float64}

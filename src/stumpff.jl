@@ -1,3 +1,15 @@
+"""
+    stumpff.jl
+
+    This module provides Stumpff functions C(z) and S(z), which are essential for the universal variable formulation of Kepler's problem in orbital mechanics.
+    These functions are used in Lambert solvers and other astrodynamics algorithms involving universal variables.
+
+    Main features:
+    - stumpff_C: computes the Stumpff C function for a given argument z
+    - stumpff_S: computes the Stumpff S function for a given argument z
+"""
+
+
 @inline function stumpff_C(z::Float64)
     az = abs(z)
     if az < 1e-8

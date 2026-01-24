@@ -1,3 +1,17 @@
+"""
+    zoom_analysis.jl
+
+    This script performs a focused (zoomed-in) analysis of porkchop plots and transfer opportunities for a specific mission scenario.
+    It loads the required SPICE kernels, sets up the planetary bodies and time windows, and generates high-resolution plots for selected transfer windows.
+
+    Main features:
+    - Loads and configures mission scenario for detailed analysis
+    - Computes porkchop plots with fine time resolution
+    - Visualizes results using CairoMakie
+
+"""
+
+
 include("PorkchopSolver.jl")
 using .PorkchopSolver
 using Dates

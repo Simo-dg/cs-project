@@ -1,3 +1,16 @@
+"""
+    demo.jl
+
+    This script demonstrates advanced porkchop plot analysis and result merging using the PorkchopSolver module.
+
+    Main features:
+    - Loads the PorkchopSolver and required libraries.
+    - Defines a merge_min function to combine results from different porkchop analyses.
+    - Allows toggling of profiling for performance analysis.
+    - Sets up grid resolution and simulation parameters.
+"""
+
+
 include("PorkchopSolver.jl")
 using .PorkchopSolver
 using Dates

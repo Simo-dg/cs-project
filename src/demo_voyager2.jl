@@ -1,3 +1,20 @@
+"""
+    demo_voyager2.jl
+
+    This script demonstrates the setup and execution of a porkchop plot analysis for the Voyager 2 mission scenario using the PorkchopSolver module.
+    It loads the required SPICE kernels, defines the planetary bodies and their ephemerides, sets up the simulation time windows for the historical Voyager 2 launch, and benchmarks the porkchop_flyby solver.
+    The script finds the best mission delta-v (dV) and saves the results to a JLD2 file for further analysis or visualization.
+
+    Main steps:
+    1. Download and load required SPICE kernels if not present.
+    2. Define the Sun, Earth, Jupiter, and Saturn with their physical and ephemeris properties.
+    3. Set up the departure, flyby, and arrival time windows for the Voyager 2 mission (1977-1981).
+    4. Run the porkchop_flyby solver and benchmark its performance.
+    5. Find the best mission delta-v and save the results to disk.
+
+"""
+
+
 include("PorkchopSolver.jl")
 using .PorkchopSolver
 using Dates
@@ -90,13 +107,15 @@ mem = @allocated voyager_task()
 println("Memory: ", round(mem/1e6, digits=2), " MB")
 
 # ------------------------------------------------------------------
-# 5. SAVE DATA
+# 5. FIND OPTIMAL MISSION & ANALYZE DATES
 # ------------------------------------------------------------------
 min_mission_dv = Inf
 best_idx = (0,0)
 
 for i in axes(res.dv_total, 1), k in axes(res.dv_total, 2)
-    # Voyager 2 Cost: Launch + Flyby only
+    # Voyager 2 Cost: Launch + Flyby (Powered assist) only
+    # Arrival at Saturn is often considered a flyby for Voyager, 
+    # so we focus on the cost to get there and the assist maneuver.
     cost = res.dv_dep[i,k] + res.dv_fly[i,k]
     
     if isfinite(cost) && cost < min_mission_dv
@@ -105,8 +124,42 @@ for i in axes(res.dv_total, 1), k in axes(res.dv_total, 2)
     end
 end
 
-println("Best Mission dV: $min_mission_dv km/s")
+# Extract indices
+i_best, k_best = best_idx
 
+# Get optimal Epochs (ET)
+dep_et = res.tdep[i_best] 
+fly_et = res.best_tfly[i_best, k_best] 
+arr_et = res.tarr[k_best]
+
+# Convert to UTC Strings for readability
+dep_utc = PS.et_to_utc(dep_et) 
+fly_utc = PS.et_to_utc(fly_et) 
+arr_utc = PS.et_to_utc(arr_et)
+
+# Calculate Time of Flight (TOF) in Days
+tof_earth_jup = (fly_et - dep_et) / 86400.0
+tof_jup_sat   = (arr_et - fly_et) / 86400.0
+tof_total     = (arr_et - dep_et) / 86400.0
+
+println("\n--- OPTIMAL VOYAGER 2 TRAJECTORY (Calculated) ---")
+println("Departure (Earth):  $dep_utc")
+println("Flyby (Jupiter):    $fly_utc")
+println("Arrival (Saturn):   $arr_utc")
+
+println("\n--- MISSION DURATION ---")
+println("Earth -> Jupiter:   $(round(tof_earth_jup, digits=2)) days")
+println("Jupiter -> Saturn:  $(round(tof_jup_sat, digits=2)) days")
+println("Total Duration:     $(round(tof_total/365.25, digits=2)) years")
+
+println("\n--- DELTA-V BREAKDOWN (km/s) ---")
+println("Launch dV (C3 proxy): $(round(res.dv_dep[i_best, k_best], digits=3))") 
+println("Flyby dV (Maneuver):  $(round(res.dv_fly[i_best, k_best], digits=3))") 
+println("Total Mission dV:     $(round(min_mission_dv, digits=3))")
+
+# ------------------------------------------------------------------
+# 6. SAVE DATA
+# ------------------------------------------------------------------
 outfile = joinpath(@__DIR__, "..", "voyager2_data.jld2")
-jldsave(outfile; res, min_mission_dv, best_idx, t0_d, sys, bm_dep, bm_fly, bm_arr)
-println("Data saved to: $outfile")
+jldsave(outfile; res, min_mission_dv, best_idx, t0_d, sys, bm_dep, bm_fly, bm_arr) 
+println("\nData saved to: $outfile")

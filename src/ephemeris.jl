@@ -1,6 +1,17 @@
-# Ephemeris backends: circular, Kepler, (optional) NAIF SPICE
-# - For SPICE, we keep calls thread-safe by using a lock here.
-# - For performance, porkchop precomputes states serially anyway.
+"""
+    ephemeris.jl
+
+    This module provides ephemeris models and state propagation functions for celestial bodies.
+    It includes implementations for circular coplanar and Keplerian ephemerides, as well as a generic interface for 
+    retrieving the state (position and velocity) of a body at a given time.
+    The code is designed to be used within astrodynamics simulations and mission design tools.
+
+    Main features:
+    - Circular coplanar ephemeris state computation
+    - Keplerian ephemeris state computation
+    - Generic state interface for different ephemeris types
+"""
+
 
 using StaticArrays
 using LinearAlgebra

@@ -1,3 +1,16 @@
+"""
+    make_plots.jl
+
+    This script provides plotting utilities for visualizing porkchop plots, mission trajectories, and related astrodynamics data.
+    It loads simulation results, sets up the required SPICE kernels, and generates high-quality figures using CairoMakie.
+
+    Main features:
+    - Loads porkchop and trajectory data from JLD2 files
+    - Downloads and loads SPICE kernels for 3D trajectory visualization
+    - Generates and saves plots to the 'plots' directory
+"""
+
+
 using CairoMakie
 using JLD2
 using Dates

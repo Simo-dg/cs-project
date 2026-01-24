@@ -1,3 +1,16 @@
+"""
+    viz_traj.jl
+
+    This module provides 3D trajectory visualization tools for interplanetary missions and astrodynamics analyses.
+    It includes functions to propagate and plot spacecraft trajectories, as well as planetary orbits, using CairoMakie for high-quality graphics.
+
+    Main features:
+    - 3D plotting of optimal transfer trajectories
+    - Visualization of planetary orbits and mission legs
+    - Utilities for propagating and converting state vectors for plotting
+"""
+
+
 using CairoMakie
 using StaticArrays
 using LinearAlgebra

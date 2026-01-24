@@ -1,3 +1,19 @@
+"""
+    demo_flyby.jl
+
+    This script demonstrates the setup and execution of a porkchop plot analysis for a gravity assist (flyby) mission using the PorkchopSolver module.
+    It loads the necessary SPICE kernels, defines the planetary bodies and their ephemerides, sets up the simulation time windows, and benchmarks the porkchop_flyby solver.
+    The results are saved to a JLD2 file for further analysis or visualization.
+
+    Main steps:
+    1. Download and load required SPICE kernels if not present.
+    2. Define the Sun, Earth, Jupiter, and Saturn with their physical and ephemeris properties.
+    3. Set up the departure, flyby, and arrival time windows for the mission scenario (e.g., Great Conjunction 2020).
+    4. Run the porkchop_flyby solver and benchmark its performance.
+    5. Save the results to disk.
+"""
+
+
 include("PorkchopSolver.jl")
 using .PorkchopSolver
 using Dates

@@ -1,3 +1,16 @@
+"""
+    lambert.jl
+
+    This module provides functions for solving Lambert's problem, which determines the orbit connecting two points
+    in space in a given time under a central gravitational field.
+
+    Main features:
+    - lambert_uv: computes initial and final velocity vectors for a given transfer
+    - Support for both short-way and long-way transfers
+    - Uses Stumpff functions for universal variable formulation
+"""
+
+
 using LinearAlgebra
 using StaticArrays
 

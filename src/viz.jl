@@ -1,3 +1,17 @@
+"""
+    viz.jl
+
+    This module provides 2D visualization utilities for porkchop plots and mission analysis in astrodynamics.
+    It includes functions for plotting delta-v, C3, and v-infinity grids, as well as utilities for axis formatting and masking invalid data.
+    The plots are generated using CairoMakie for high-quality output.
+
+    Main features:
+    - 2D grid plotting for porkchop analysis (plot_grid)
+    - Axis and date formatting utilities
+    - Data masking for invalid or infeasible solutions
+"""
+
+
 using CairoMakie
 using Dates
 

@@ -1,3 +1,16 @@
+"""
+    flyby.jl
+
+    This module implements gravity assist (flyby) trajectory analysis and porkchop plot computation for interplanetary missions.
+    It provides data structures and functions to efficiently compute optimal transfer trajectories involving a planetary flyby, 
+    including delta-v and timing analysis.
+
+    Main features:
+    - FlybyResult and FlybyWorkspace data structures for storing results and pre-allocated workspace
+    - porkchop_flyby function for computing porkchop plots with a flyby maneuver
+"""
+
+
 using StaticArrays
 using LinearAlgebra
 using Base.Threads

@@ -1,3 +1,18 @@
+"""
+	PorkchopSolver.jl
+
+	This module provides a comprehensive toolkit for interplanetary trajectory design, porkchop plot analysis, and gravity assist mission planning.
+	It integrates ephemeris models, Lambert solvers, porkchop plot computation, flyby analysis, and advanced visualization tools for astrodynamics applications.
+
+	Main features:
+	- Data structures for celestial bodies, ephemerides, and mission systems
+	- Lambert and universal variable solvers
+	- Porkchop plot computation and visualization
+	- Gravity assist (flyby) analysis and powered flyby calculations
+	- 3D trajectory visualization utilities
+"""
+
+
 module PorkchopSolver
 
 using LinearAlgebra

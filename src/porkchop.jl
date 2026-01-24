@@ -1,4 +1,16 @@
-# src/porkchop.jl
+"""
+    porkchop.jl
+
+    This module implements porkchop plot computation for interplanetary trajectory design.
+    It provides data structures and functions to efficiently compute and store delta-v, C3, and arrival v-infinity for a grid of departure and arrival dates.
+    The porkchop plot is a key tool for visualizing and selecting optimal transfer opportunities between planets.
+
+    Main features:
+    - PorkchopResult and PorkchopWorkspace data structures for storing results and workspace
+    - Functions for computing porkchop plots and analyzing transfer opportunities
+"""
+
+
 using StaticArrays
 using LinearAlgebra
 

@@ -1,3 +1,10 @@
+"""
+    run_project.jl
+
+    This script automates the execution of all main project scripts, including solvers and plotting utilities.
+    It sequentially runs the demo, flyby, Voyager 2, and plotting scripts, reporting their status and any errors encountered.
+"""
+
 using Dates
 
 function run_script(path)

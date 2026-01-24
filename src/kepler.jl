@@ -1,3 +1,18 @@
+"""
+    kepler.jl
+
+    This module provides functions for Keplerian orbital mechanics, including coordinate transformations, 
+    Kepler's equation solver, and conversion from orbital elements to position and velocity vectors.
+    It is intended for use in astrodynamics simulations and trajectory analysis.
+
+    Main features:
+    - Rotation matrices for coordinate transformations (R1, R3)
+    - Conversion from perifocal to ECI frame
+    - Kepler's equation solver (kepler_E)
+    - Conversion from Keplerian elements to state vectors (kepler_to_rv)
+"""
+
+
 using LinearAlgebra
 using StaticArrays
 

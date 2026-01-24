@@ -1,3 +1,15 @@
+"""
+    gravity_assist.jl
+
+    This module provides functions for modeling and analyzing gravity assist (flyby) maneuvers in interplanetary trajectories.
+    It includes calculations for the turning angle during a flyby and the required delta-v for powered flybys when gravity alone is insufficient.
+
+    Main features:
+    - flyby_turning_angle: computes the turning angle for a given periapsis and hyperbolic excess velocity
+    - powered_flyby_delta_v: computes the required delta-v for a powered flyby maneuver
+"""
+
+
 using StaticArrays
 using LinearAlgebra
 

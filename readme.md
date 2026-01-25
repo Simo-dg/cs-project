@@ -1,13 +1,12 @@
 # High-Performance Trajectory Design and Optimization in Julia
 
-**Course:** Computer Science I (Programming)  
-**Program:** PhD in Statistics and Computer Science (Bocconi University)
+**Course:** Computer Science I (Programming)
 
 ---
 
 ## Overview
 
-This project implements a **high-performance scientific computing framework in Julia** for interplanetary trajectory design. The primary goal is to write **efficient, allocation-aware, and scalable Julia code**, in line with the objectives of the course.
+This project implements a **high-performance scientific computing framework in Julia** for interplanetary trajectory design. The primary goal is to write **efficient, allocation-aware, and scalable Julia code** for solving large-scale trajectory optimization problems.
 
 The framework supports:
 
@@ -55,8 +54,9 @@ The implementation explicitly targets performance:
 
 - **StaticArrays** (`SVector{3,Float64}`) are used for all 3D vectors to avoid heap allocations.
 - All large arrays are **preallocated** and reused via dedicated workspace structures.
-- Core numerical kernels are **allocation-free**; remaining allocations originate from setup, I/O, or plotting.
-- The outer grid loops are parallelized using `Threads.@threads`, achieving ~80–85% CPU utilization.
+- Core numerical kernels are **allocation-free**; inner loops avoid dynamic memory operations.
+- The outer grid loops are parallelized using `Threads.@threads` for multi-core scalability.
+- Careful attention is paid to \*\*avoiding type instability, unnecessary temporaries, and branching
 
 ---
 
